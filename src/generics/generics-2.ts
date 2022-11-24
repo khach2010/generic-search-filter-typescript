@@ -30,5 +30,5 @@ const myVis = new Vis()
 
 printLegCount(myCat)
 printLegCount(myDuck)
-printLegCount(myVis)
+// printLegCount(myVis)
 // Typescript give a warning to printLegCount(myVis) because  class Vis is not extends from Animal 

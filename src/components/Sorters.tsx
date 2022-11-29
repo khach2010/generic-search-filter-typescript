@@ -1,5 +1,5 @@
 import React from 'react'
-import Property from '../interfaces/Property'
+import Property from '../interfaces/ISorter'
 
 export interface SortersProps<T> {
   object: T

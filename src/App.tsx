@@ -5,13 +5,14 @@ import WidgetRenderer from './components/rendereres/WidgetRenderer'
 import { SearchInput } from './components/SearchInput'
 import { Sorters } from './components/Sorters'
 import Person from './interfaces/Person'
-import Property from './interfaces/Property'
+import Property from './interfaces/ISorter'
 import Widget from './interfaces/Widget'
 import people from './mock-data/people'
 import widgets from './mock-data/widgets'
 import genericFilter from './utils/genericFilter'
 import genericSearch from './utils/genericSearch'
 import genericSort from './utils/genericSort'
+import IFilter from './interfaces/IFilter'
 
 function App() {
   const [query, setQuery] = useState<string>('')
@@ -20,7 +21,7 @@ function App() {
     isDescending: true,
   })
   const [widgetFilterProperties, setWidgetFilterProperties] = useState<
-    Array<keyof Widget>
+    Array<IFilter<Widget>>
   >([])
 
   const [personProperty, setPersonProperty] = useState<Property<Person>>({
@@ -30,7 +31,7 @@ function App() {
 
   const [showPeople, setShowPeople] = useState<boolean>(false)
   const [peopleFilterProperties, setPeopleFilterProperties] = useState<
-    Array<keyof Person>
+    Array<IFilter<Person>>
   >([])
   const buttonText = showPeople ? 'show widget' : 'show people'
 
@@ -57,12 +58,35 @@ function App() {
             object={widgets[0]}
             properties={widgetFilterProperties}
             onChangeFilter={(property) => {
-              widgetFilterProperties.includes(property)
-                ? setWidgetFilterProperties(widgetFilterProperties.filter(widgetProperty => widgetProperty !== property))
-                : setWidgetFilterProperties([
-                    ...widgetFilterProperties,
-                    property,
-                  ])
+              const propertyMatched = widgetFilterProperties.some(
+                (widgetFilterProperty) =>
+                  widgetFilterProperty.property === property.property
+              )
+              const fullMatched = widgetFilterProperties.some(
+                (widgetFilterProperty) =>
+                  widgetFilterProperty.property === property.property &&
+                  widgetFilterProperty.isTruthySelected ===
+                    property.isTruthySelected
+              )
+
+              if (fullMatched) {
+                setWidgetFilterProperties(
+                  widgetFilterProperties.filter(
+                    (widgetFilterProperty) =>
+                      widgetFilterProperty.property !== property.property
+                  )
+                )
+              } else if (propertyMatched) {
+                setWidgetFilterProperties([
+                  ...widgetFilterProperties.filter(
+                    (widgetFilterProperty) =>
+                      widgetFilterProperty.property !== property.property
+                  ),
+                  property,
+                ])
+              } else {
+                setWidgetFilterProperties([...widgetFilterProperties, property])
+              }
             }}
           />
           {widgets
@@ -90,7 +114,11 @@ function App() {
             properties={peopleFilterProperties}
             onChangeFilter={(property) => {
               peopleFilterProperties.includes(property)
-                ? setPeopleFilterProperties(peopleFilterProperties.filter(personProperty => personProperty !== property))
+                ? setPeopleFilterProperties(
+                    peopleFilterProperties.filter(
+                      (personProperty) => personProperty !== property
+                    )
+                  )
                 : setPeopleFilterProperties([
                     ...peopleFilterProperties,
                     property,

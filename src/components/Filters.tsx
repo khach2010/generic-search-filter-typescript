@@ -1,9 +1,10 @@
 import React from 'react'
+import IFilter from '../interfaces/IFilter'
 
 export interface FiltersProps<T> {
   object: T
-  properties: Array<keyof T>
-  onChangeFilter: (property: keyof T) => void
+  properties: Array<IFilter<T>>
+  onChangeFilter: (property: IFilter<T>) => void
 }
 
 export default function Filters<T extends object>(props: FiltersProps<T>) {
@@ -11,19 +12,38 @@ export default function Filters<T extends object>(props: FiltersProps<T>) {
 
   return (
     <div className="p-1 my-2">
-    
       {Object.keys(object).map((key) => {
         return (
           <>
             <input
               type="checkbox"
               value={key}
-              id={key}
-              onChange={() => onChangeFilter(key as any)}
-              checked={properties.some(property => property === key)}
-              className='m-1 ml-3'
+              id={`${key}-true`}
+              onChange={() =>
+                onChangeFilter({ property: key as any, isTruthySelected: true })
+              }
+              checked={properties.some(
+                (property) =>
+                  property.property === key && property.isTruthySelected
+              )}
+              className="m-1 ml-3"
             />
-            <label htmlFor="key" >{key}</label>
+            <label htmlFor={`${key}-true`}>{key} is truthy</label>
+            <br />
+            <input
+              type="checkbox"
+              value={key}
+              id={`${key}-false`}
+              onChange={() =>
+                onChangeFilter({
+                  property: key as any,
+                  isTruthySelected: false,
+                })
+              }
+              checked={properties.includes(key as any)}
+              className="m-1 ml-3"
+            />
+            <label htmlFor={`${key}-false`}>{key} is falsy</label>
           </>
         )
       })}

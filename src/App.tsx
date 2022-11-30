@@ -16,21 +16,22 @@ import IFilter from './interfaces/IFilter'
 
 function App() {
   const [query, setQuery] = useState<string>('')
- 
+  const [showPeople, setShowPeople] = useState<boolean>(false)
+  const buttonText = showPeople ? 'show widget' : 'show people'
+
   const [widgetFilterProperties, setWidgetFilterProperties] = useState<
     Array<IFilter<Widget>>
   >([])
 
-  const [personProperty, setPersonProperty] = useState<ISorter<Person>>({
-    property: 'firstName',
-    isDescending: true,
-  })
-
-  const [showPeople, setShowPeople] = useState<boolean>(false)
+  const [personSortProperty, setPersonSortProperty] = useState<ISorter<Person>>(
+    {
+      property: 'firstName',
+      isDescending: true,
+    }
+  )
   const [peopleFilterProperties, setPeopleFilterProperties] = useState<
     Array<IFilter<Person>>
   >([])
-  const buttonText = showPeople ? 'show widget' : 'show people'
 
   return (
     <div className="App">
@@ -42,19 +43,17 @@ function App() {
         {buttonText}
       </button>
 
-      <SearchInput setSearchQuery={(query) => setQuery(query)} />
-
       {!showPeople && (
         <div>
           <h2>Widget</h2>
-          <Sorters
+          <SearchInput
             dataSource={widgets}
-            initialSortProperty="title"
-          >
-          {
-            (widget) => <WidgetRenderer {...widget} />
-          }
-         </Sorters>
+            searchKeys={['title', 'description']}
+          />
+          <Sorters dataSource={widgets} initialSortProperty="title">
+            {(widget) => <WidgetRenderer {...widget} />}
+          </Sorters>
+
           <Filters
             object={widgets[0]}
             properties={widgetFilterProperties}
@@ -104,13 +103,8 @@ function App() {
       {showPeople && (
         <div>
           <h2>People</h2>
-          <Sorters
-            dataSource={people}
-            initialSortProperty="firstName"
-          >
-            {
-              person => <PersonRenderer {...person} />
-            }
+          <Sorters dataSource={people} initialSortProperty="firstName">
+            {(person) => <PersonRenderer {...person} />}
           </Sorters>
           <Filters
             object={people[0]}
@@ -119,7 +113,7 @@ function App() {
               peopleFilterProperties.includes(property)
                 ? setPeopleFilterProperties(
                     peopleFilterProperties.filter(
-                      (personProperty) => personProperty !== property
+                      (personSortProperty) => personSortProperty !== property
                     )
                   )
                 : setPeopleFilterProperties([
@@ -139,7 +133,7 @@ function App() {
               )
             )
             .filter((person) => genericFilter(person, peopleFilterProperties))
-            .sort((a, b) => genericSort(a, b, personProperty))
+            .sort((a, b) => genericSort(a, b, personSortProperty))
             .map((person) => {
               return <PersonRenderer {...person} />
             })}

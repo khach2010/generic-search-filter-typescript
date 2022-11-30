@@ -1,10 +1,7 @@
-import React, { ReactNode, useState } from 'react'
+import React, { useState } from 'react'
 import ISorter from '../interfaces/ISorter'
+import { PropsWithChildrenFunction } from '../types/PropsWithChildrenFunction'
 import genericSort from '../utils/genericSort'
-
-type PropsWithChildrenFunction<P, T> = P & {
-  children?(item: T): ReactNode
-}
 
 export interface SortersProps<T> {
   dataSource: Array<T>

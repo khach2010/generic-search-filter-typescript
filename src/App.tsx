@@ -1,11 +1,11 @@
 import React, { useState } from 'react'
 import Filters from './components/Filters'
-import PersonRenderer from './components/rendereres/PeopleRenderer'
+import PersonRenderer from './components/rendereres/PersonRenderer'
 import WidgetRenderer from './components/rendereres/WidgetRenderer'
 import { SearchInput } from './components/SearchInput'
 import { Sorters } from './components/Sorters'
 import Person from './interfaces/Person'
-import Property from './interfaces/ISorter'
+import ISorter from './interfaces/ISorter'
 import Widget from './interfaces/Widget'
 import people from './mock-data/people'
 import widgets from './mock-data/widgets'
@@ -16,15 +16,12 @@ import IFilter from './interfaces/IFilter'
 
 function App() {
   const [query, setQuery] = useState<string>('')
-  const [widgetProperty, setWidgetProperty] = useState<Property<Widget>>({
-    property: 'title',
-    isDescending: true,
-  })
+ 
   const [widgetFilterProperties, setWidgetFilterProperties] = useState<
     Array<IFilter<Widget>>
   >([])
 
-  const [personProperty, setPersonProperty] = useState<Property<Person>>({
+  const [personProperty, setPersonProperty] = useState<ISorter<Person>>({
     property: 'firstName',
     isDescending: true,
   })
@@ -51,9 +48,13 @@ function App() {
         <div>
           <h2>Widget</h2>
           <Sorters
-            object={widgets[0]}
-            setProperty={(propertyType) => setWidgetProperty(propertyType)}
-          />
+            dataSource={widgets}
+            initialSortProperty="title"
+          >
+          {
+            (widget) => <WidgetRenderer {...widget} />
+          }
+         </Sorters>
           <Filters
             object={widgets[0]}
             properties={widgetFilterProperties}
@@ -94,7 +95,6 @@ function App() {
               genericSearch(widget, ['title', 'description'], query, false)
             )
             .filter((widget) => genericFilter(widget, widgetFilterProperties))
-            .sort((a, b) => genericSort(a, b, widgetProperty))
             .map((widget) => {
               return <WidgetRenderer {...widget} />
             })}
@@ -105,10 +105,13 @@ function App() {
         <div>
           <h2>People</h2>
           <Sorters
-            object={people[0]}
-            setProperty={(propertyType) => setPersonProperty(propertyType)}
-          />
-
+            dataSource={people}
+            initialSortProperty="firstName"
+          >
+            {
+              person => <PersonRenderer {...person} />
+            }
+          </Sorters>
           <Filters
             object={people[0]}
             properties={peopleFilterProperties}

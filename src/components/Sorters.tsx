@@ -1,14 +1,25 @@
-import React from 'react'
-import Property from '../interfaces/ISorter'
+import React, { ReactNode, useState } from 'react'
+import ISorter from '../interfaces/ISorter'
+import genericSort from '../utils/genericSort'
 
-export interface SortersProps<T> {
-  object: T
-  setProperty: (propertyType: Property<T>) => void
+type PropsWithChildrenFunction<P, T> = P & {
+  children?(item: T): ReactNode
 }
 
-export function Sorters<T extends object>(props: SortersProps<T>) {
-  const { object, setProperty } = props
+export interface SortersProps<T> {
+  dataSource: Array<T>
+  initialSortProperty: keyof T
+}
 
+export function Sorters<T extends object>(
+  props: PropsWithChildrenFunction<SortersProps<T>, T>
+) {
+  const { dataSource, initialSortProperty, children } = props
+  const [sortProperty, setSortProperty] = useState<ISorter<T>>({
+    property: initialSortProperty,
+    isDescending: true,
+  })
+  const object = dataSource.length > 0 ? dataSource[0] : {}
   return (
     <>
       <label htmlFor="sorters">Sorters! try here</label>
@@ -19,7 +30,7 @@ export function Sorters<T extends object>(props: SortersProps<T>) {
         onChange={(e) => {
           const values = e.target.value.split('-')
           if (values.length === 2) {
-            setProperty({
+            setSortProperty({
               property: values[0] as any,
               isDescending: values[1] === 'true',
             })
@@ -39,6 +50,10 @@ export function Sorters<T extends object>(props: SortersProps<T>) {
           </>
         ))}
       </select>
+      {children &&
+        dataSource
+          .sort((a, b) => genericSort(a, b, sortProperty))
+          .map((widget) => children(widget))}
     </>
   )
 }

@@ -1,45 +1,39 @@
-import React, { useEffect, useState} from 'react'
+import { useEffect, useState } from 'react'
 import useDebounce from '../hooks/useDebounce'
-import { PropsWithChildrenFunction } from '../types/PropsWithChildrenFunction'
-import genericSearch from '../utils/genericSearch'
 
-interface SearchInputProps<T> {
-  dataSource: Array<T>
-  searchKeys: Array< keyof T>
+interface SearchInputProps{
+  setSearchQuery(searchQuery: string): void
+  searchQuery: string;
 }
 
-export function SearchInput<T>(props: PropsWithChildrenFunction<SearchInputProps<T>, T> ) {
-
-  const {searchKeys, dataSource, children} = props
-  const [query, setQuery] = useState<string>('')
-  const [searchQuery , setSearchQuery] = useState<string>('')
-  const debouncedQuery = useDebounce( query, 500);
+export function SearchInput(
+  props: SearchInputProps
+) {
+  const { setSearchQuery, searchQuery } = props
+  const [query, setQuery] = useState<string>(searchQuery)
+  const debouncedQuery = useDebounce(query, 150)
 
   useEffect(() => {
     setSearchQuery(debouncedQuery)
-  }, [ debouncedQuery , setSearchQuery ])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedQuery])
 
   return (
     <>
-   
-    <div>
-      <label htmlFor="search" className='mt-3'>Search ...</label>
-      <input 
-      type="search" 
-      id='search' 
-      className='form-control full-width' 
-      placeholder='search ...' 
-      aria-label='search' 
-      onChange={event => setQuery(event.target.value)} />
-    </div>
-    
-     {children &&
-        dataSource
-          .filter((person) => genericSearch(person, searchKeys, searchQuery,false))
-          .map((widget) => children(widget))}
-
+      <div>
+        <label htmlFor="search" className="mt-3">
+          Search ...
+        </label>
+        <input
+          value={searchQuery}
+          type="search"
+          id="search"
+          className="form-control full-width"
+          placeholder="search ..."
+          aria-label="search"
+          onChange={(event) => setQuery(event.target.value)}
+        />
+      </div>
     </>
-
   )
 }
-

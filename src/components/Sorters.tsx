@@ -1,21 +1,16 @@
-import React, { useState } from 'react'
+import React from 'react'
 import ISorter from '../interfaces/ISorter'
-import { PropsWithChildrenFunction } from '../types/PropsWithChildrenFunction'
-import genericSort from '../utils/genericSort'
+
 
 export interface SortersProps<T> {
-  dataSource: Array<T>
-  initialSortProperty: keyof T
+  dataSource: Array<T>;
+  setSortProperty(sortProperty: ISorter<T>): void;
 }
 
 export function Sorters<T extends object>(
-  props: PropsWithChildrenFunction<SortersProps<T>, T>
+  props: SortersProps<T>
 ) {
-  const { dataSource, initialSortProperty, children } = props
-  const [sortProperty, setSortProperty] = useState<ISorter<T>>({
-    property: initialSortProperty,
-    isDescending: true,
-  })
+  const { dataSource, setSortProperty } = props
   const object = dataSource.length > 0 ? dataSource[0] : {}
   return (
     <>
@@ -35,7 +30,7 @@ export function Sorters<T extends object>(
         }}
       >
         {Object.keys(object).map((key) => (
-          <>
+          <React.Fragment key={key}>
             <option key={`${key}-true`} value={`${key}-true`}>
               {' '}
               sort by: {`${key}-Descending`}{' '}
@@ -44,13 +39,9 @@ export function Sorters<T extends object>(
               {' '}
               sort by: {`${key}-Ascending`}{' '}
             </option>
-          </>
+          </React.Fragment>
         ))}
       </select>
-      {children &&
-        dataSource
-          .sort((a, b) => genericSort(a, b, sortProperty))
-          .map((widget) => children(widget))}
     </>
   )
 }

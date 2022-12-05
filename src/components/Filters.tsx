@@ -1,46 +1,37 @@
-import React, { useState } from 'react'
+import React from 'react'
 import IFilter from '../interfaces/IFilter'
-import { PropsWithChildrenFunction } from '../types/PropsWithChildrenFunction'
-import genericFilter from '../utils/genericFilter'
 
 export interface FiltersProps<T> {
   dataSource: Array<T>
+  filterProperties: Array<IFilter<T>>
+  setFilterProperties(filterProperties: Array<IFilter<T>>): void
 }
 
-export default function Filters<T extends object>(
-  props: PropsWithChildrenFunction<FiltersProps<T>, T>
-) {
-  const { dataSource, children } = props
-  const [filterProperties, setFilterProperties] = useState<Array<IFilter<T>>>(
-    []
-  )
+export default function Filters<T extends {}>(props: FiltersProps<T>) {
+  const { dataSource, filterProperties, setFilterProperties } = props
   const object = dataSource.length > 0 ? dataSource[0] : {}
 
   const onChangeFilter = (property: IFilter<T>) => {
     const propertyMatched = filterProperties.some(
-      (filterProperty) =>
-      filterProperty.property === property.property
+      (filterProperty) => filterProperty.property === property.property
     )
 
     const fullMatched = filterProperties.some(
       (filterProperty) =>
         filterProperty.property === property.property &&
-        filterProperty.isTruthySelected ===
-          property.isTruthySelected
+        filterProperty.isTruthySelected === property.isTruthySelected
     )
 
     if (fullMatched) {
       setFilterProperties(
         filterProperties.filter(
-          (filterProperty) =>
-            filterProperty.property !== property.property
+          (filterProperty) => filterProperty.property !== property.property
         )
       )
     } else if (propertyMatched) {
       setFilterProperties([
         ...filterProperties.filter(
-          (filterProperty) =>
-            filterProperty.property !== property.property
+          (filterProperty) => filterProperty.property !== property.property
         ),
         property,
       ])
@@ -51,17 +42,19 @@ export default function Filters<T extends object>(
 
   return (
     <>
-
       <div className="p-1 my-2">
         {Object.keys(object).map((key) => {
           return (
-            <>
+            <React.Fragment key={key}>
               <input
                 type="checkbox"
                 value={key}
                 id={`${key}-true`}
                 onChange={() =>
-                  onChangeFilter({ property: key as any, isTruthySelected: true })
+                  onChangeFilter({
+                    property: key as any,
+                    isTruthySelected: true,
+                  })
                 }
                 checked={filterProperties.some(
                   (property) =>
@@ -85,20 +78,10 @@ export default function Filters<T extends object>(
                 className="m-1 ml-3"
               />
               <label htmlFor={`${key}-false`}>{key} is falsy</label>
-            </>
+            </React.Fragment>
           )
         })}
       </div>
-      
-      {
-        children && dataSource   
-        .filter((widget) => genericFilter(widget, filterProperties))
-        .map((widget) => children(widget))
-      }
-
     </>
   )
-
 }
-
-
